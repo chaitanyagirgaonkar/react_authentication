@@ -3,6 +3,11 @@ import { useRef, useState, useEffect } from 'react'
 import useAuth from '../hooks/useAuth'
 import axios from '../api/axios'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import useInput from '../hooks/useInput'
+import useToggle from '../hooks/useToggle'
+
+
+
 const LOGIN_URL = '/auth'
 
 function Login() {
@@ -15,9 +20,11 @@ function Login() {
     const userRef = useRef()
     const errRef = useRef()
 
-    const [user, setUser] = useState('')
+    const [user, resetUser, userAttribs] = useInput('user', '')//useState('')
     const [pwd, setPwd] = useState('')
     const [errMsg, setErrMsg] = useState('')
+
+    const [check, toggleCheck] = useToggle('persist', false)
 
 
     useEffect(() => {
@@ -40,9 +47,10 @@ function Login() {
             )
             console.log(JSON.stringify(response.data));
             const accessToken = response?.data?.accessToken;
-            const roles = response?.data?.roles;
-            setAuth({ user, pwd, roles, accessToken })
-            setUser('')
+
+            setAuth({ user, accessToken })
+            // setUser('')
+            resetUser()
             setPwd('')
             navigate(from, { replace: true })
         } catch (err) {
@@ -58,6 +66,9 @@ function Login() {
             errRef.current.focus()
         }
     }
+
+
+
     return (
 
         <section>
@@ -77,8 +88,8 @@ function Login() {
                     required
                     ref={userRef}
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    {...userAttribs}
+
 
                 />
                 <label htmlFor="password">
@@ -93,6 +104,15 @@ function Login() {
                 />
 
                 <button>Sign In</button>
+                <div className='persistCheck'>
+                    <input
+                        type="checkbox"
+                        id="persist"
+                        onChange={toggleCheck}
+                        checked={check}
+                    />
+                    <label htmlFor="persist">Trust This Device</label>
+                </div>
             </form>
             <p>
                 Need an Account? <br />
